@@ -1,17 +1,109 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.chart.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 
-<StackPane xmlns:fx="http://javafx.com/fxml" fx:controller="org.minotor.analytics.controller.DashboardController" style="-fx-background-color: #f4f6fb;">
-    <VBox alignment="CENTER" spacing="28" maxWidth="420">
-        <ImageView fx:id="logoImageView" fitWidth="120" fitHeight="120" preserveRatio="true" />
-        <Label text="Tableau de bord" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #222;"/>
-        <VBox spacing="18" maxWidth="280">
-            <Button text="Voir les rapports" style="-fx-background-color: #A52A2A; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 5; -fx-padding: 10 0 10 0; -fx-pref-width: 220;"/>
-            <Button text="Utilisateurs" style="-fx-background-color: #A52A2A; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 5; -fx-padding: 10 0 10 0; -fx-pref-width: 220;"/>
-            <Button text="Déconnexion" style="-fx-background-color: #A52A2A; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 5; -fx-padding: 10 0 10 0; -fx-pref-width: 220;"/>
-        </VBox>
+<StackPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="org.minotor.analytics.controller.DashboardController"
+           style="-fx-background-color: #f4f6fb;">
+
+    <VBox alignment="CENTER" spacing="20" maxWidth="1200">
+
+        <!-- En-tête -->
+        <HBox alignment="CENTER" spacing="20">
+            <ImageView fx:id="logoImageView" fitWidth="80" fitHeight="80" preserveRatio="true"/>
+            <VBox alignment="CENTER">
+                <Label text="Tableau de bord Analytics"
+                       style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #222;"/>
+                <Label fx:id="statsLabel" text="Chargement des statistiques..."
+                       style="-fx-font-size: 12px; -fx-text-fill: #666;"/>
+            </VBox>
+        </HBox>
+
+        <!-- Filtres -->
+        <HBox spacing="10" alignment="CENTER">
+            <Label text="Période:" style="-fx-font-weight: bold;"/>
+            <Button fx:id="filterTodayBtn" text="Aujourd'hui" onAction="#filterToday"/>
+            <Button fx:id="filterWeekBtn" text="Cette semaine" onAction="#filterWeek"/>
+            <Button fx:id="filterMonthBtn" text="Ce mois" onAction="#filterMonth"/>
+            <Button fx:id="filterAllBtn" text="Tout" onAction="#filterAll"/>
+        </HBox>
+
+        <!-- Onglets -->
+        <TabPane prefWidth="1100" prefHeight="500">
+
+            <!-- Onglet Données -->
+            <Tab text="📊 Données brutes" closable="false">
+                <TableView fx:id="analyticsTable" prefHeight="450">
+                    <columns>
+                        <TableColumn text="URL" fx:id="urlColumn" prefWidth="200"/>
+                        <TableColumn text="Date" fx:id="dateColumn" prefWidth="120"/>
+                        <TableColumn text="Appareil" fx:id="deviceColumn" prefWidth="100"/>
+                        <TableColumn text="Pays" fx:id="countryColumn" prefWidth="100"/>
+                        <TableColumn text="Durée" fx:id="durationColumn" prefWidth="80"/>
+                        <TableColumn text="Type" fx:id="typeColumn" prefWidth="100"/>
+                    </columns>
+                </TableView>
+            </Tab>
+
+            <!-- Onglet Pages populaires -->
+            <Tab text="📈 Pages populaires" closable="false">
+                <VBox spacing="10" alignment="CENTER">
+                    <Label text="Pages les plus visitées" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+                    <BarChart fx:id="pageViewsChart" prefWidth="1000" prefHeight="400">
+                        <xAxis><CategoryAxis label="Pages"/></xAxis>
+                        <yAxis><NumberAxis label="Visites"/></yAxis>
+                    </BarChart>
+                </VBox>
+            </Tab>
+
+            <!-- Onglet Répartition -->
+            <Tab text="🥧 Répartition" closable="false">
+                <HBox spacing="20" alignment="CENTER">
+                    <VBox alignment="CENTER">
+                        <Label text="Types d'appareils" style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
+                        <PieChart fx:id="deviceChart" prefWidth="400" prefHeight="350"/>
+                    </VBox>
+                    <VBox alignment="CENTER">
+                        <Label text="Top pays" style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
+                        <PieChart fx:id="countryChart" prefWidth="400" prefHeight="350"/>
+                    </VBox>
+                </HBox>
+            </Tab>
+
+            <!-- Onglet Statistiques -->
+            <Tab text="📋 Statistiques" closable="false">
+                <VBox spacing="20" alignment="CENTER" style="-fx-padding: 30;">
+                    <GridPane hgap="30" vgap="20" alignment="CENTER">
+                        <Label text="Durée moyenne des sessions:" GridPane.columnIndex="0" GridPane.rowIndex="0"
+                               style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
+                        <Label fx:id="avgDurationLabel" text="--" GridPane.columnIndex="1" GridPane.rowIndex="0"
+                               style="-fx-font-size: 14px;"/>
+
+                        <Label text="Taux de rebond:" GridPane.columnIndex="0" GridPane.rowIndex="1"
+                               style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
+                        <Label fx:id="bounceRateLabel" text="--" GridPane.columnIndex="1" GridPane.rowIndex="1"
+                               style="-fx-font-size: 14px;"/>
+
+                        <Label text="Total des événements:" GridPane.columnIndex="0" GridPane.rowIndex="2"
+                               style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
+                        <Label fx:id="totalEventsLabel" text="--" GridPane.columnIndex="1" GridPane.rowIndex="2"
+                               style="-fx-font-size: 14px;"/>
+                    </GridPane>
+                </VBox>
+            </Tab>
+
+        </TabPane>
+
+        <!-- Boutons -->
+        <HBox spacing="18" alignment="CENTER">
+            <Button text="🔄 Actualiser" onAction="#refreshData"
+                    style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 5; -fx-padding: 10 20 10 20;"/>
+            <Button fx:id="logoutButton" text="🚪 Déconnexion" onAction="#onLogoutButtonClick"
+                    style="-fx-background-color: #A52A2A; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 5; -fx-padding: 10 20 10 20;"/>
+        </HBox>
+
     </VBox>
 </StackPane>

@@ -13,7 +13,7 @@ import java.io.IOException;
 public class SceneManager {
 
     // Changement de scène via Stage (ex: Main)
-    public static void setScene(Stage stage, String fxmlPath, boolean maximize) {
+    public static void setScene(Stage stage, String fxmlPath, boolean maximize, boolean fullScreen) {
         try {
             // Récupérer l'état maximisé actuel
             boolean wasMaximized = stage.isMaximized();
@@ -42,10 +42,12 @@ public class SceneManager {
                 stage.setMinWidth(800);
                 stage.setMinHeight(600);
 
-                // Important: désactiver puis réactiver la maximisation
                 if (maximize || wasMaximized) {
-                    stage.setMaximized(false); // Désactiver d'abord
-                    stage.setMaximized(true);  // Puis réactiver
+                    stage.setMaximized(false);
+                    Platform.runLater(() -> stage.setMaximized(true));
+                }
+                if (fullScreen) {
+                    stage.setFullScreen(true);
                 }
             });
         } catch (IOException e) {
@@ -53,22 +55,33 @@ public class SceneManager {
         }
     }
 
-    // Autres méthodes inchangées...
+    // Surcharge pour compatibilité avec anciens appels (sans plein écran)
+    public static void setScene(Stage stage, String fxmlPath, boolean maximize) {
+        setScene(stage, fxmlPath, maximize, false);
+    }
 
     // Changement de scène via Event (ex: depuis un contrôleur)
-    public static void setScene(Event event, String fxmlPath, boolean maximize) {
+    public static void setScene(Event event, String fxmlPath, boolean maximize, boolean fullScreen) {
         Stage stage = getStageFromEvent(event);
         if (stage != null) {
-            setScene(stage, fxmlPath, maximize);
+            setScene(stage, fxmlPath, maximize, fullScreen);
         }
     }
 
+    public static void setScene(Event event, String fxmlPath, boolean maximize) {
+        setScene(event, fxmlPath, maximize, false);
+    }
+
     // Changement de scène via un Node (ex: depuis un contrôleur)
-    public static void setScene(Node node, String fxmlPath, boolean maximize) {
+    public static void setScene(Node node, String fxmlPath, boolean maximize, boolean fullScreen) {
         Stage stage = getStageFromNode(node);
         if (stage != null) {
-            setScene(stage, fxmlPath, maximize);
+            setScene(stage, fxmlPath, maximize, fullScreen);
         }
+    }
+
+    public static void setScene(Node node, String fxmlPath, boolean maximize) {
+        setScene(node, fxmlPath, maximize, false);
     }
 
     // Récupère le Stage à partir d'un Event
@@ -84,4 +97,4 @@ public class SceneManager {
     private static Stage getStageFromNode(Node node) {
         return (Stage) node.getScene().getWindow();
     }
-} v
+}

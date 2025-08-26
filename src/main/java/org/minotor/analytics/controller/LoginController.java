@@ -12,7 +12,7 @@ public class LoginController {
 
     @FXML
     public void initialize() {
-        var stream = getClass().getResourceAsStream("/org/minotor/analytics/images/logo1_minotor.png");
+        var stream = getClass().getResourceAsStream("/org/minotor/analytics/images/logo_transparent.png");
         if (stream == null) {
             System.out.println("Image non trouvée !");
         } else {

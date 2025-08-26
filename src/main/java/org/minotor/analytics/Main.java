@@ -15,7 +15,7 @@ public class Main extends Application {
         primaryStage.show();
 
         // Charge la vue login via SceneManager (maximisée)
-        SceneManager.setScene(primaryStage, "/org/minotor/analytics/login-view.fxml", true);
+        SceneManager.setScene(primaryStage, "/org/minotor/analytics/login-view.fxml", false);
     }
 
     public static void main(String[] args) {

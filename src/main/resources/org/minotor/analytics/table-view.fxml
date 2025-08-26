@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+
+<TableView fx:id="analyticsTable" xmlns:fx="http://javafx.com/fxml">
+    <columns>
+        <TableColumn text="Date" fx:id="dateColumn"/>
+        <TableColumn text="Utilisateur" fx:id="userIdColumn"/>
+        <TableColumn text="Lieu" fx:id="locationColumn"/>
+        <TableColumn text="Trajet" fx:id="pathColumn"/>
+    </columns>
+</TableView>
