@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<StackPane xmlns:fx="http://javafx.com/fxml" fx:controller="org.minotor.analytics.controller.LoginController" style="-fx-background-color: #f4f6fb;">
+    <VBox alignment="CENTER" spacing="28" maxWidth="320">
+        <ImageView fx:id="logoImageView" fitWidth="420" fitHeight="420" preserveRatio="true" />
+        <VBox spacing="18" maxWidth="280">
+            <Label text="Email" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #A52A2A;"/>
+            <TextField promptText="Entrez votre email"
+                       style="-fx-background-radius: 5; -fx-border-radius: 5; -fx-background-color: #f9f6f2; -fx-pref-height: 38; -fx-border-color: #A52A2A; -fx-border-width: 1; -fx-text-fill: #222;"/>
+            <Label text="Mot de passe" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #A52A2A;"/>
+            <PasswordField promptText="Entrez votre mot de passe"
+                           style="-fx-background-radius: 5; -fx-border-radius: 5; -fx-background-color: #f9f6f2; -fx-pref-height: 38; -fx-border-color: #A52A2A; -fx-border-width: 1; -fx-text-fill: #222;"/>
+        </VBox>
+        <Button text="Se connecter" onAction="#onLoginButtonClick"
+                style="-fx-background-color: #A52A2A; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 5; -fx-padding: 10 0 10 0; -fx-pref-width: 180;"/>
+    </VBox>
+</StackPane>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<StackPane xmlns:fx="http://javafx.com/fxml" fx:controller="org.minotor.analytics.controller.DashboardController" style="-fx-background-color: #f4f6fb;">
+    <VBox alignment="CENTER" spacing="28" maxWidth="420">
+        <ImageView fx:id="logoImageView" fitWidth="120" fitHeight="120" preserveRatio="true" />
+        <Label text="Tableau de bord" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #222;"/>
+        <VBox spacing="18" maxWidth="280">
+            <Button text="Voir les rapports" style="-fx-background-color: #A52A2A; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 5; -fx-padding: 10 0 10 0; -fx-pref-width: 220;"/>
+            <Button text="Utilisateurs" style="-fx-background-color: #A52A2A; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 5; -fx-padding: 10 0 10 0; -fx-pref-width: 220;"/>
+            <Button text="Déconnexion" style="-fx-background-color: #A52A2A; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 5; -fx-padding: 10 0 10 0; -fx-pref-width: 220;"/>
+        </VBox>
+    </VBox>
+</StackPane>
