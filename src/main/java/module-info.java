@@ -4,6 +4,8 @@ module org.minotor.analytics {
     requires org.mongodb.driver.sync.client;
     requires org.mongodb.bson;
     requires org.mongodb.driver.core;
+    requires java.net.http;
+    requires com.fasterxml.jackson.databind;
 
     exports org.minotor.analytics;
     exports org.minotor.analytics.controller;

@@ -56,7 +56,13 @@ public class AnalyticsService {
                         LinkedHashMap::new
                 ));
     }
-
+    public Map<String, Long> getEventTypeStats() {
+        return mongoService.getAnalyticsEvents().stream()
+                .collect(Collectors.groupingBy(
+                        event -> event.getEventType() != null ? event.getEventType() : "Inconnu",
+                        Collectors.counting()
+                ));
+    }
     public Map<String, Long> getDeviceTypeStats() {
         return mongoService.getAnalyticsEvents().stream()
                 .filter(event -> event.getDeviceType() != null)
@@ -64,44 +70,6 @@ public class AnalyticsService {
                         AnalyticsEvent::getDeviceType,
                         Collectors.counting()
                 ));
-    }
-
-    public Map<String, Long> getCountryStats() {
-        return mongoService.getAnalyticsEvents().stream()
-                .filter(event -> event.getCountry() != null)
-                .collect(Collectors.groupingBy(
-                        AnalyticsEvent::getCountry,
-                        Collectors.counting()
-                ))
-                .entrySet().stream()
-                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
-                .limit(10)
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue,
-                        (e1, e2) -> e1,
-                        LinkedHashMap::new
-                ));
-    }
-
-    public Double getAverageSessionDuration() {
-        return mongoService.getAnalyticsEvents().stream()
-                .filter(event -> event.getSessionDuration() != null)
-                .mapToLong(AnalyticsEvent::getSessionDuration)
-                .average()
-                .orElse(0.0);
-    }
-
-    public Double getBounceRate() {
-        List<AnalyticsEvent> events = mongoService.getAnalyticsEvents();
-        long totalEvents = events.size();
-        if (totalEvents == 0) return 0.0;
-
-        long bounces = events.stream()
-                .filter(event -> Boolean.TRUE.equals(event.getIsBounce()))
-                .count();
-
-        return (double) bounces / totalEvents * 100;
     }
 
     public void close() {

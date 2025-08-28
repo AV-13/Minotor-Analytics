@@ -8,13 +8,10 @@ public class AnalyticsEvent {
     private Date timestamp;
     private String userAgent;
     private String referrer;
-    private Long sessionDuration;
     private String deviceType;
-    private String country;
     private Integer screenWidth;
     private Integer screenHeight;
     private String language;
-    private Boolean isBounce;
     private String eventType;
     private String pageTitle;
     private Integer loadTime;
@@ -45,14 +42,8 @@ public class AnalyticsEvent {
     public String getReferrer() { return referrer; }
     public void setReferrer(String referrer) { this.referrer = referrer; }
 
-    public Long getSessionDuration() { return sessionDuration; }
-    public void setSessionDuration(Long sessionDuration) { this.sessionDuration = sessionDuration; }
-
     public String getDeviceType() { return deviceType; }
     public void setDeviceType(String deviceType) { this.deviceType = deviceType; }
-
-    public String getCountry() { return country; }
-    public void setCountry(String country) { this.country = country; }
 
     public Integer getScreenWidth() { return screenWidth; }
     public void setScreenWidth(Integer screenWidth) { this.screenWidth = screenWidth; }
@@ -62,9 +53,6 @@ public class AnalyticsEvent {
 
     public String getLanguage() { return language; }
     public void setLanguage(String language) { this.language = language; }
-
-    public Boolean getIsBounce() { return isBounce; }
-    public void setIsBounce(Boolean isBounce) { this.isBounce = isBounce; }
 
     public String getEventType() { return eventType; }
     public void setEventType(String eventType) { this.eventType = eventType; }
@@ -79,14 +67,6 @@ public class AnalyticsEvent {
     public String getFormattedDate() {
         if (timestamp != null) {
             return new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(timestamp);
-        }
-        return "N/A";
-    }
-
-    public String getFormattedDuration() {
-        if (sessionDuration != null) {
-            long seconds = sessionDuration / 1000;
-            return seconds + "s";
         }
         return "N/A";
     }

@@ -4,106 +4,195 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
 
-<StackPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
-           fx:controller="org.minotor.analytics.controller.DashboardController"
-           style="-fx-background-color: #f4f6fb;">
+<BorderPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.minotor.analytics.controller.DashboardController"
+            styleClass="root">
 
-    <VBox alignment="CENTER" spacing="20" maxWidth="1200">
+    <!-- Sidebar gauche -->
+    <left>
+        <VBox styleClass="sidebar" prefWidth="280" minWidth="280" maxWidth="280">
 
-        <!-- En-tête -->
-        <HBox alignment="CENTER" spacing="20">
-            <ImageView fx:id="logoImageView" fitWidth="80" fitHeight="80" preserveRatio="true"/>
-            <VBox alignment="CENTER">
-                <Label text="Tableau de bord Analytics"
-                       style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #222;"/>
-                <Label fx:id="statsLabel" text="Chargement des statistiques..."
-                       style="-fx-font-size: 12px; -fx-text-fill: #666;"/>
+            <!-- Logo et titre -->
+            <VBox alignment="CENTER" spacing="16" styleClass="sidebar-header">
+                <ImageView fx:id="logoImageView" fitWidth="80" fitHeight="80" preserveRatio="true"/>
+                <Label text="MINOT'OR" styleClass="sidebar-title"/>
+                <Label text="Analytics Dashboard" styleClass="sidebar-subtitle"/>
             </VBox>
-        </HBox>
 
-        <!-- Filtres -->
-        <HBox spacing="10" alignment="CENTER">
-            <Label text="Période:" style="-fx-font-weight: bold;"/>
-            <Button fx:id="filterTodayBtn" text="Aujourd'hui" onAction="#filterToday"/>
-            <Button fx:id="filterWeekBtn" text="Cette semaine" onAction="#filterWeek"/>
-            <Button fx:id="filterMonthBtn" text="Ce mois" onAction="#filterMonth"/>
-            <Button fx:id="filterAllBtn" text="Tout" onAction="#filterAll"/>
-        </HBox>
+            <!-- Menu de navigation -->
+            <VBox spacing="8" styleClass="sidebar-menu">
+                <Button fx:id="dashboardBtn" text="📊 Vue d'ensemble" onAction="#showDashboard" styleClass="sidebar-menu-item, sidebar-menu-active"/>
+                <Button fx:id="pagesBtn" text="📄 Pages visitées" onAction="#showPages" styleClass="sidebar-menu-item"/>
+                <Button fx:id="devicesBtn" text="💻 Appareils" onAction="#showDevices" styleClass="sidebar-menu-item"/>
+                <Button fx:id="eventsBtn" text="🎯 Types d'événements" onAction="#showEvents" styleClass="sidebar-menu-item"/>
+                <Button fx:id="reportsBtn" text="📈 Rapports détaillés" onAction="#showReports" styleClass="sidebar-menu-item"/>
+                <Button fx:id="settingsBtn" text="⚙️ Paramètres" onAction="#showSettings" styleClass="sidebar-menu-item"/>
+            </VBox>
 
-        <!-- Onglets -->
-        <TabPane prefWidth="1100" prefHeight="500">
+            <!-- Spacer pour pousser le profil en bas -->
+            <Region VBox.vgrow="ALWAYS"/>
 
-            <!-- Onglet Données -->
-            <Tab text="📊 Données brutes" closable="false">
-                <TableView fx:id="analyticsTable" prefHeight="450">
-                    <columns>
-                        <TableColumn text="URL" fx:id="urlColumn" prefWidth="200"/>
-                        <TableColumn text="Date" fx:id="dateColumn" prefWidth="120"/>
-                        <TableColumn text="Appareil" fx:id="deviceColumn" prefWidth="100"/>
-                        <TableColumn text="Pays" fx:id="countryColumn" prefWidth="100"/>
-                        <TableColumn text="Durée" fx:id="durationColumn" prefWidth="80"/>
-                        <TableColumn text="Type" fx:id="typeColumn" prefWidth="100"/>
-                    </columns>
-                </TableView>
-            </Tab>
+            <!-- Profil utilisateur en bas -->
+            <VBox styleClass="sidebar-profile" alignment="CENTER" spacing="8" >
+                <Label fx:id="profileNameLabel" text="Auguste Moussa" styleClass="profile-name"/>
+                <Label fx:id="profileRoleLabel" text="Boulanger" styleClass="profile-role"/>
 
-            <!-- Onglet Pages populaires -->
-            <Tab text="📈 Pages populaires" closable="false">
-                <VBox spacing="10" alignment="CENTER">
-                    <Label text="Pages les plus visitées" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
-                    <BarChart fx:id="pageViewsChart" prefWidth="1000" prefHeight="400">
-                        <xAxis><CategoryAxis label="Pages"/></xAxis>
-                        <yAxis><NumberAxis label="Visites"/></yAxis>
-                    </BarChart>
+                <Button fx:id="logoutButton" text="🚪 Déconnexion"
+                        onAction="#onLogoutButtonClick"
+                        styleClass="sidebar-logout-btn"/>
+            </VBox>
+        </VBox>
+    </left>
+
+    <!-- Contenu principal -->
+    <center>
+        <ScrollPane fitToWidth="true" styleClass="main-scroll-pane">
+            <VBox spacing="24" styleClass="main-content">
+
+                <!-- Section Vue d'ensemble (par défaut) -->
+                <VBox fx:id="dashboardSection" spacing="24">
+                    <!-- Bandeau de titre principal -->
+                    <HBox alignment="CENTER_LEFT" spacing="16" styleClass="main-header">
+                        <Label text="Vue d'ensemble Analytics" styleClass="main-title"/>
+                    </HBox>
+
+                    <!-- Cartes d'indicateurs clés -->
+                    <HBox spacing="24" alignment="CENTER" styleClass="stats-cards-container">
+                        <VBox styleClass="stats-card" alignment="CENTER" spacing="8">
+                            <Label text="📊" styleClass="stats-icon"/>
+                            <Label fx:id="totalEventsLabel" text="0" styleClass="stats-value"/>
+                            <Label text="Événements totaux" styleClass="stats-label"/>
+                        </VBox>
+
+                        <VBox styleClass="stats-card" alignment="CENTER" spacing="8">
+                            <Label text="📄" styleClass="stats-icon"/>
+                            <Label fx:id="uniquePagesLabel" text="0" styleClass="stats-value"/>
+                            <Label text="Pages uniques" styleClass="stats-label"/>
+                        </VBox>
+
+                        <VBox styleClass="stats-card" alignment="CENTER" spacing="8">
+                            <Label text="💻" styleClass="stats-icon"/>
+                            <Label fx:id="uniqueDevicesLabel" text="0" styleClass="stats-value"/>
+                            <Label text="Types d'appareils" styleClass="stats-label"/>
+                        </VBox>
+                    </HBox>
+
+                    <!-- Filtres et contrôles -->
+                    <HBox spacing="16" alignment="CENTER_LEFT" styleClass="controls-bar">
+                        <Label fx:id="statsLabel" text="📅 Période :" styleClass="filter-label"/>                        <Button fx:id="filterTodayBtn" text="Aujourd'hui" onAction="#filterToday" styleClass="filter-button"/>
+                        <Button fx:id="filterWeekBtn" text="Cette semaine" onAction="#filterWeek" styleClass="filter-button"/>
+                        <Button fx:id="filterMonthBtn" text="Ce mois" onAction="#filterMonth" styleClass="filter-button"/>
+                        <Button fx:id="filterAllBtn" text="Toutes les données" onAction="#filterAll" styleClass="filter-button"/>
+
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button text="📥 Exporter CSV" onAction="#exportData" styleClass="export-button"/>
+                    </HBox>
+
+                    <!-- Graphiques -->
+                    <HBox spacing="24" alignment="CENTER">
+                        <VBox styleClass="chart-card" alignment="CENTER" spacing="12">
+                            <Label text="📄 Pages les plus visitées" styleClass="chart-card-title"/>
+                            <BarChart fx:id="pageViewsChart" prefWidth="400" prefHeight="300" styleClass="secondary-chart">
+                                <xAxis><CategoryAxis styleClass="chart-axis"/></xAxis>
+                                <yAxis><NumberAxis styleClass="chart-axis"/></yAxis>
+                            </BarChart>
+                        </VBox>
+
+                        <VBox styleClass="chart-card" alignment="CENTER" spacing="12">
+                            <Label text="💻 Types d'appareils" styleClass="chart-card-title"/>
+                            <PieChart fx:id="deviceChart" prefWidth="350" prefHeight="300" styleClass="secondary-chart"/>
+                        </VBox>
+                    </HBox>
                 </VBox>
-            </Tab>
 
-            <!-- Onglet Répartition -->
-            <Tab text="🥧 Répartition" closable="false">
-                <HBox spacing="20" alignment="CENTER">
-                    <VBox alignment="CENTER">
-                        <Label text="Types d'appareils" style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
-                        <PieChart fx:id="deviceChart" prefWidth="400" prefHeight="350"/>
+                <!-- Section Pages -->
+                <VBox fx:id="pagesSection" spacing="24" visible="false" managed="false">
+                    <HBox alignment="CENTER_LEFT" spacing="16" styleClass="main-header">
+                        <Label text="Analyse des Pages" styleClass="main-title"/>
+                    </HBox>
+
+                    <VBox styleClass="chart-container">
+                        <BarChart fx:id="pagesDetailChart" prefWidth="800" prefHeight="500" styleClass="main-chart">
+                            <xAxis><CategoryAxis styleClass="chart-axis"/></xAxis>
+                            <yAxis><NumberAxis styleClass="chart-axis"/></yAxis>
+                        </BarChart>
                     </VBox>
-                    <VBox alignment="CENTER">
-                        <Label text="Top pays" style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
-                        <PieChart fx:id="countryChart" prefWidth="400" prefHeight="350"/>
-                    </VBox>
-                </HBox>
-            </Tab>
-
-            <!-- Onglet Statistiques -->
-            <Tab text="📋 Statistiques" closable="false">
-                <VBox spacing="20" alignment="CENTER" style="-fx-padding: 30;">
-                    <GridPane hgap="30" vgap="20" alignment="CENTER">
-                        <Label text="Durée moyenne des sessions:" GridPane.columnIndex="0" GridPane.rowIndex="0"
-                               style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
-                        <Label fx:id="avgDurationLabel" text="--" GridPane.columnIndex="1" GridPane.rowIndex="0"
-                               style="-fx-font-size: 14px;"/>
-
-                        <Label text="Taux de rebond:" GridPane.columnIndex="0" GridPane.rowIndex="1"
-                               style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
-                        <Label fx:id="bounceRateLabel" text="--" GridPane.columnIndex="1" GridPane.rowIndex="1"
-                               style="-fx-font-size: 14px;"/>
-
-                        <Label text="Total des événements:" GridPane.columnIndex="0" GridPane.rowIndex="2"
-                               style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
-                        <Label fx:id="totalEventsLabel" text="--" GridPane.columnIndex="1" GridPane.rowIndex="2"
-                               style="-fx-font-size: 14px;"/>
-                    </GridPane>
                 </VBox>
-            </Tab>
 
-        </TabPane>
+                <!-- Section Appareils -->
+                <VBox fx:id="devicesSection" spacing="24" visible="false" managed="false">
+                    <HBox alignment="CENTER_LEFT" spacing="16" styleClass="main-header">
+                        <Label text="Analyse des Appareils" styleClass="main-title"/>
+                    </HBox>
 
-        <!-- Boutons -->
-        <HBox spacing="18" alignment="CENTER">
-            <Button text="🔄 Actualiser" onAction="#refreshData"
-                    style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 5; -fx-padding: 10 20 10 20;"/>
-            <Button fx:id="logoutButton" text="🚪 Déconnexion" onAction="#onLogoutButtonClick"
-                    style="-fx-background-color: #A52A2A; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 5; -fx-padding: 10 20 10 20;"/>
-        </HBox>
+                    <HBox spacing="24" alignment="CENTER">
+                        <VBox styleClass="chart-card" alignment="CENTER" spacing="12">
+                            <Label text="💻 Répartition détaillée" styleClass="chart-card-title"/>
+                            <PieChart fx:id="devicesDetailChart" prefWidth="400" prefHeight="400" styleClass="secondary-chart"/>
+                        </VBox>
 
-    </VBox>
-</StackPane>
+                        <VBox styleClass="chart-card" alignment="CENTER" spacing="12">
+                            <Label text="📊 Statistiques appareils" styleClass="chart-card-title"/>
+                            <TableView fx:id="deviceStatsTable" prefWidth="350" prefHeight="400">
+                                <columns>
+                                    <TableColumn fx:id="deviceNameColumn" text="Appareil" prefWidth="200"/>
+                                    <TableColumn fx:id="deviceVisitsColumn" text="Visites" prefWidth="100"/>
+                                    <TableColumn fx:id="devicePercentColumn" text="Pourcentage" prefWidth="50"/>
+                                </columns>
+                            </TableView>
+                        </VBox>
+                    </HBox>
+                </VBox>
+
+                <!-- Section Événements -->
+                <VBox fx:id="eventsSection" spacing="24" visible="false" managed="false">
+                    <HBox alignment="CENTER_LEFT" spacing="16" styleClass="main-header">
+                        <Label text="Types d'Événements" styleClass="main-title"/>
+                    </HBox>
+
+                    <HBox spacing="24" alignment="CENTER">
+                        <VBox styleClass="chart-card" alignment="CENTER" spacing="12">
+                            <Label text="🎯 Répartition par type" styleClass="chart-card-title"/>
+                            <PieChart fx:id="eventTypesChart" prefWidth="350" prefHeight="300" styleClass="secondary-chart"/>
+                        </VBox>
+
+                        <VBox styleClass="chart-card" alignment="CENTER" spacing="12">
+                            <Label text="📈 Évolution des événements" styleClass="chart-card-title"/>
+                            <BarChart fx:id="eventTypesBarChart" prefWidth="400" prefHeight="300" styleClass="secondary-chart">
+                                <xAxis><CategoryAxis styleClass="chart-axis"/></xAxis>
+                                <yAxis><NumberAxis styleClass="chart-axis"/></yAxis>
+                            </BarChart>
+                        </VBox>
+                    </HBox>
+                </VBox>
+
+                <!-- Section Rapports -->
+                <VBox fx:id="reportsSection" spacing="24" visible="false" managed="false">
+                    <HBox alignment="CENTER_LEFT" spacing="16" styleClass="main-header">
+                        <Label text="Rapports Détaillés" styleClass="main-title"/>
+                    </HBox>
+
+                    <VBox spacing="16">
+                        <HBox alignment="CENTER_LEFT" spacing="12" styleClass="table-header">
+                            <Label text="📊 Données complètes" styleClass="section-title"/>
+                            <Button fx:id="toggleTableBtn" text="▼ Afficher/Masquer" onAction="#toggleTable" styleClass="toggle-button"/>
+                        </HBox>
+
+                        <TableView fx:id="analyticsTable" prefHeight="400" styleClass="data-table">
+                            <columns>
+                                <TableColumn text="URL" fx:id="urlColumn" prefWidth="300"/>
+                                <TableColumn text="Date et Heure" fx:id="dateColumn" prefWidth="160"/>
+                                <TableColumn text="Appareil" fx:id="deviceColumn" prefWidth="120"/>
+                                <TableColumn text="Type événement" fx:id="typeColumn" prefWidth="150"/>
+                            </columns>
+                        </TableView>
+                    </VBox>
+                </VBox>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+
+</BorderPane>

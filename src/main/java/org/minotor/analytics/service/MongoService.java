@@ -185,23 +185,13 @@ public class MongoService {
             event.setUserAgent(doc.getString("userAgent"));
             event.setReferrer(doc.getString("referrer"));
 
-            // SessionDuration - gérer Integer/Long
-            Object sessionDurationObj = doc.get("sessionDuration");
-            if (sessionDurationObj instanceof Integer) {
-                event.setSessionDuration(((Integer) sessionDurationObj).longValue());
-            } else if (sessionDurationObj instanceof Long) {
-                event.setSessionDuration((Long) sessionDurationObj);
-            }
-
             event.setDeviceType(doc.getString("deviceType"));
-            event.setCountry(doc.getString("country"));
 
             // ScreenWidth et ScreenHeight - déjà Integer, pas de problème
             event.setScreenWidth(doc.getInteger("screenWidth"));
             event.setScreenHeight(doc.getInteger("screenHeight"));
 
             event.setLanguage(doc.getString("language"));
-            event.setIsBounce(doc.getBoolean("isBounce"));
             event.setEventType(doc.getString("eventType"));
             event.setPageTitle(doc.getString("pageTitle"));
 
@@ -245,10 +235,7 @@ public class MongoService {
             event.setUrl(urls[i % urls.length]);
             event.setTimestamp(new Date(System.currentTimeMillis() - (i * 3600000))); // Il y a i heures
             event.setDeviceType(devices[i % devices.length]);
-            event.setCountry(countries[i % countries.length]);
             event.setEventType(eventTypes[i % eventTypes.length]);
-            event.setSessionDuration((long) (Math.random() * 300000)); // 0-5 minutes
-            event.setIsBounce(Math.random() < 0.3); // 30% de rebond
             event.setLoadTime((int) (Math.random() * 3000)); // 0-3 secondes
 
             testEvents.add(event);
