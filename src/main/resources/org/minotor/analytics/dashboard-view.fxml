@@ -10,18 +10,15 @@
             fx:controller="org.minotor.analytics.controller.DashboardController"
             styleClass="root">
 
-    <!-- Sidebar gauche -->
     <left>
         <VBox styleClass="sidebar" prefWidth="280" minWidth="280" maxWidth="280">
 
-            <!-- Logo et titre -->
             <VBox alignment="CENTER" spacing="16" styleClass="sidebar-header">
                 <ImageView fx:id="logoImageView" fitWidth="80" fitHeight="80" preserveRatio="true"/>
                 <Label text="MINOT'OR" styleClass="sidebar-title"/>
                 <Label text="Analytics Dashboard" styleClass="sidebar-subtitle"/>
             </VBox>
 
-            <!-- Menu de navigation -->
             <VBox spacing="8" styleClass="sidebar-menu">
                 <Button fx:id="dashboardBtn" text="📊 Vue d'ensemble" onAction="#showDashboard" styleClass="sidebar-menu-item, sidebar-menu-active"/>
                 <Button fx:id="pagesBtn" text="📄 Pages visitées" onAction="#showPages" styleClass="sidebar-menu-item"/>
@@ -31,10 +28,8 @@
                 <Button fx:id="settingsBtn" text="⚙️ Paramètres" onAction="#showSettings" styleClass="sidebar-menu-item"/>
             </VBox>
 
-            <!-- Spacer pour pousser le profil en bas -->
             <Region VBox.vgrow="ALWAYS"/>
 
-            <!-- Profil utilisateur en bas -->
             <VBox styleClass="sidebar-profile" alignment="CENTER" spacing="8" >
                 <Label fx:id="profileNameLabel" text="Auguste Moussa" styleClass="profile-name"/>
                 <Label fx:id="profileRoleLabel" text="Boulanger" styleClass="profile-role"/>
@@ -46,19 +41,15 @@
         </VBox>
     </left>
 
-    <!-- Contenu principal -->
     <center>
         <ScrollPane fitToWidth="true" styleClass="main-scroll-pane">
             <VBox spacing="24" styleClass="main-content">
 
-                <!-- Section Vue d'ensemble (par défaut) -->
                 <VBox fx:id="dashboardSection" spacing="24">
-                    <!-- Bandeau de titre principal -->
                     <HBox alignment="CENTER_LEFT" spacing="16" styleClass="main-header">
                         <Label text="Vue d'ensemble Analytics" styleClass="main-title"/>
                     </HBox>
 
-                    <!-- Cartes d'indicateurs clés -->
                     <HBox spacing="24" alignment="CENTER" styleClass="stats-cards-container">
                         <VBox styleClass="stats-card" alignment="CENTER" spacing="8">
                             <Label text="📊" styleClass="stats-icon"/>
@@ -79,7 +70,6 @@
                         </VBox>
                     </HBox>
 
-                    <!-- Filtres et contrôles -->
                     <HBox spacing="16" alignment="CENTER_LEFT" styleClass="controls-bar">
                         <Label fx:id="statsLabel" text="📅 Période :" styleClass="filter-label"/>                        <Button fx:id="filterTodayBtn" text="Aujourd'hui" onAction="#filterToday" styleClass="filter-button"/>
                         <Button fx:id="filterWeekBtn" text="Cette semaine" onAction="#filterWeek" styleClass="filter-button"/>
@@ -90,7 +80,6 @@
                         <Button text="📥 Exporter CSV" onAction="#exportData" styleClass="export-button"/>
                     </HBox>
 
-                    <!-- Graphiques -->
                     <HBox spacing="24" alignment="CENTER">
                         <VBox styleClass="chart-card" alignment="CENTER" spacing="12">
                             <Label text="📄 Pages les plus visitées" styleClass="chart-card-title"/>
@@ -107,7 +96,6 @@
                     </HBox>
                 </VBox>
 
-                <!-- Section Pages -->
                 <VBox fx:id="pagesSection" spacing="24" visible="false" managed="false">
                     <HBox alignment="CENTER_LEFT" spacing="16" styleClass="main-header">
                         <Label text="Analyse des Pages" styleClass="main-title"/>
@@ -121,7 +109,6 @@
                     </VBox>
                 </VBox>
 
-                <!-- Section Appareils -->
                 <VBox fx:id="devicesSection" spacing="24" visible="false" managed="false">
                     <HBox alignment="CENTER_LEFT" spacing="16" styleClass="main-header">
                         <Label text="Analyse des Appareils" styleClass="main-title"/>
@@ -146,7 +133,6 @@
                     </HBox>
                 </VBox>
 
-                <!-- Section Événements -->
                 <VBox fx:id="eventsSection" spacing="24" visible="false" managed="false">
                     <HBox alignment="CENTER_LEFT" spacing="16" styleClass="main-header">
                         <Label text="Types d'Événements" styleClass="main-title"/>
@@ -168,7 +154,6 @@
                     </HBox>
                 </VBox>
 
-                <!-- Section Rapports -->
                 <VBox fx:id="reportsSection" spacing="24" visible="false" managed="false">
                     <HBox alignment="CENTER_LEFT" spacing="16" styleClass="main-header">
                         <Label text="Rapports Détaillés" styleClass="main-title"/>

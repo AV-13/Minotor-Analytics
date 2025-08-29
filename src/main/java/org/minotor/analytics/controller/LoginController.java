@@ -13,9 +13,18 @@ import org.minotor.analytics.utils.SceneManager;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+/**
+ * Controller for the login screen of the application.
+ * This class handles user login and manages the UI elements.
+ */
 public class LoginController implements Initializable {
 
+    private static final Logger LOGGER = Logger.getLogger(LoginController.class.getName());
+
+    // UI elements from the FXML file
     @FXML private TextField emailField;
     @FXML private PasswordField passwordField;
     @FXML private Button loginButton;
@@ -25,125 +34,134 @@ public class LoginController implements Initializable {
 
     private AuthService authService;
 
+    /**
+     * Called when the login screen is loaded.
+     * Sets up the UI and prepares everything for user interaction.
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         authService = new AuthService();
 
-        // Charger le logo
+        // Load the company logo
         var stream = getClass().getResourceAsStream("/org/minotor/analytics/images/logo_transparent.png");
         if (stream != null) {
             logoImageView.setImage(new Image(stream));
         }
 
-        // Masquer l'indicateur de chargement par défaut
+        // Hide loading spinner and error message by default
         loadingIndicator.setVisible(false);
         errorLabel.setVisible(false);
 
-        // Permettre la connexion avec Entrée
+        // Allow login by pressing Enter key in password field
         passwordField.setOnAction(this::onLoginButtonClick);
 
-        // Charger le CSS après que la scène soit prête
-        Platform.runLater(() -> {
-            loadModernStyles();
-        });
+        // Apply styles when everything is ready
+        Platform.runLater(this::loadModernStyles);
     }
 
+    /**
+     * Loads CSS styles to make the login screen look nice.
+     * This method tries to apply modern styling to the interface.
+     */
     private void loadModernStyles() {
         try {
-            // Attendre que la scène soit disponible
+            // Wait until the scene is available
             if (emailField.getScene() != null) {
-                String cssPath = "/modern-dashboard.css"; // Chemin corrigé
+                String cssPath = "/modern-dashboard.css";
                 var cssUrl = getClass().getResource(cssPath);
-                System.out.println("🔍 Recherche CSS à : " + cssPath);
-                System.out.println("🔍 Fichier trouvé : " + (cssUrl != null ? cssUrl.toString() : "NON TROUVÉ"));
+                LOGGER.info("Recherche CSS à : " + cssPath);
+                LOGGER.info("Fichier trouvé : " + (cssUrl != null ? cssUrl.toString() : "NON TROUVÉ"));
 
                 if (cssUrl != null) {
                     String cssString = cssUrl.toExternalForm();
 
-                    // Appliquer le CSS à la scène
+                    // Apply CSS to the scene
                     emailField.getScene().getStylesheets().clear();
                     emailField.getScene().getStylesheets().add(cssString);
 
-                    // Forcer l'application des styles
+                    // Force styles to be applied
                     emailField.getScene().getRoot().applyCss();
 
-                    System.out.println("✅ CSS Login chargé et appliqué avec succès");
+                    LOGGER.info("CSS Login chargé et appliqué avec succès");
                 }
             } else {
-                // Réessayer plus tard si la scène n'est pas prête
-                Platform.runLater(() -> loadModernStyles());
+                // Try again later if scene is not ready
+                Platform.runLater(this::loadModernStyles);
             }
         } catch (Exception e) {
-            System.err.println("❌ Erreur chargement CSS login : " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Erreur chargement CSS login", e);
         }
     }
 
+    /**
+     * This method runs when user clicks the login button.
+     * It checks the email and password, then tries to log the user in.
+     */
     @FXML
     private void onLoginButtonClick(ActionEvent event) {
-        System.out.println("🔍 Début de la connexion...");
+        LOGGER.info("Début de la connexion...");
 
         String email = emailField.getText().trim();
         String password = passwordField.getText();
 
-        System.out.println("📧 Email: " + email);
-        System.out.println("🔒 Mot de passe: " + (password.isEmpty() ? "VIDE" : "NON VIDE (" + password.length() + " chars)"));
-
-        // Validation des champs
+        // Check if email field is empty
         if (email.isEmpty()) {
-            System.out.println("❌ Email vide");
+            LOGGER.warning("Email vide");
             showError("Veuillez saisir votre adresse email");
             emailField.requestFocus();
             return;
         }
 
+        // Check if password field is empty
         if (password.isEmpty()) {
-            System.out.println("❌ Mot de passe vide");
+            LOGGER.warning("Mot de passe vide");
             showError("Veuillez saisir votre mot de passe");
             passwordField.requestFocus();
             return;
         }
 
-        System.out.println("✅ Validations passées, démarrage de la connexion...");
+        LOGGER.info("Validations passées, démarrage de la connexion...");
 
-        // Désactiver les contrôles pendant la connexion
+        // Disable buttons while login is happening
         setControlsEnabled(false);
         showLoading(true);
         hideError();
 
-        // Exécuter la connexion en arrière-plan
+        // Create a background task to handle login (prevents UI freezing)
         Task<AuthService.AuthResult> loginTask = new Task<>() {
             @Override
             protected AuthService.AuthResult call() {
-                System.out.println("🌐 Appel API en cours...");
+                LOGGER.info("Appel API en cours...");
                 AuthService.AuthResult result = authService.login(email, password);
-                System.out.println("📡 Réponse API reçue: " + result.isSuccess() + " - " + result.getMessage());
+                LOGGER.info("Réponse API reçue: " + result.isSuccess() + " - " + result.getMessage());
                 return result;
             }
         };
 
+        // What to do when login succeeds
         loginTask.setOnSucceeded(e -> {
             Platform.runLater(() -> {
-                System.out.println("✅ Tâche de connexion terminée avec succès");
+                LOGGER.info("Tâche de connexion terminée avec succès");
                 AuthService.AuthResult result = loginTask.getValue();
 
                 if (result.isSuccess()) {
-                    System.out.println("✅ Connexion réussie, redirection vers dashboard...");
+                    LOGGER.info("Connexion réussie, redirection vers dashboard...");
+                    // Go to main dashboard screen
                     SceneManager.setScene(event, "/org/minotor/analytics/dashboard-view.fxml", true);
                 } else {
-                    System.out.println("❌ Échec de connexion: " + result.getMessage());
-                    // Gestion spécifique selon le type d'erreur
+                    LOGGER.warning("Échec de connexion: " + result.getMessage());
+                    // Show different error messages based on problem type
                     String errorMessage = result.getMessage();
 
                     if (errorMessage.contains("Droits insuffisants")) {
-                        showError("❌ " + errorMessage);
+                        showError(errorMessage);
                     } else if (errorMessage.contains("incorrect")) {
-                        showError("🔐 " + errorMessage);
-                        // Effacer le mot de passe en cas d'erreur d'authentification
+                        showError(errorMessage);
+                        // Clear password if login credentials are wrong
                         passwordField.clear();
                         emailField.requestFocus();
                     } else {
-                        showError("⚠️ " + errorMessage);
+                        showError(errorMessage);
                     }
 
                     setControlsEnabled(true);
@@ -152,45 +170,53 @@ public class LoginController implements Initializable {
             });
         });
 
+        // What to do if login completely fails
         loginTask.setOnFailed(e -> {
             Platform.runLater(() -> {
-                System.err.println("💥 Échec de la tâche de connexion: " + e.getSource().getException().getMessage());
-                e.getSource().getException().printStackTrace();
-                showError("❌ Erreur de connexion. Veuillez réessayer.");
+                LOGGER.log(Level.SEVERE, "Échec de la tâche de connexion", e.getSource().getException());
+                showError("Erreur de connexion. Veuillez réessayer.");
                 setControlsEnabled(true);
                 showLoading(false);
             });
         });
 
-        // Exécuter la tâche dans un thread séparé
+        // Start the login process in background
         Thread loginThread = new Thread(loginTask);
         loginThread.setDaemon(true);
         loginThread.start();
 
-        System.out.println("🚀 Thread de connexion démarré");
+        LOGGER.info("Thread de connexion démarré");
     }
 
-    private boolean isValidEmail(String email) {
-        return email.contains("@") && email.contains(".");
-    }
-
+    /**
+     * Enable or disable the input fields and login button
+     */
     private void setControlsEnabled(boolean enabled) {
         emailField.setDisable(!enabled);
         passwordField.setDisable(!enabled);
         loginButton.setDisable(!enabled);
     }
 
+    /**
+     * Show or hide the loading spinner and change button text
+     */
     private void showLoading(boolean show) {
         loadingIndicator.setVisible(show);
         loginButton.setText(show ? "Connexion..." : "Se connecter");
     }
 
+    /**
+     * Display an error message to the user
+     */
     private void showError(String message) {
         errorLabel.setText(message);
         errorLabel.setVisible(true);
         errorLabel.setManaged(true);
     }
 
+    /**
+     * Hide the error message
+     */
     private void hideError() {
         errorLabel.setVisible(false);
         errorLabel.setManaged(false);

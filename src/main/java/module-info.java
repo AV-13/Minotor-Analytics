@@ -6,6 +6,7 @@ module org.minotor.analytics {
     requires org.mongodb.driver.core;
     requires java.net.http;
     requires com.fasterxml.jackson.databind;
+    requires java.logging;
 
     exports org.minotor.analytics;
     exports org.minotor.analytics.controller;
