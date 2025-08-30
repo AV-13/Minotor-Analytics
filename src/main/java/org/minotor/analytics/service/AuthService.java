@@ -2,6 +2,7 @@ package org.minotor.analytics.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.minotor.analytics.model.User;
 
 import java.io.IOException;
 import java.net.URI;
@@ -58,18 +59,8 @@ public class AuthService {
      * Information about the currently logged-in user (name, email, role, etc.).
      * This is like an ID card that contains the user's details.
      */
-    private JsonNode currentUser;
+    private User currentUser;
 
-    /**
-     * Gets the information about the currently logged-in user.
-     * This method allows other parts of the application to access user details
-     * like name, email, or role without making additional API calls.
-     *
-     * @return A JsonNode containing user information, or null if no user is logged in
-     */
-    public JsonNode getCurrentUser() {
-        return currentUser;
-    }
 
     /**
      * Creates a new AuthService and sets up the HTTP client for making API calls.
@@ -107,15 +98,11 @@ public class AuthService {
      */
     public AuthResult login(String email, String password) {
         try {
-            // Create JSON request body with the user's credentials
-            // This is like filling out a login form in text format
             String requestBody = String.format(
                     "{\"email\":\"%s\",\"password\":\"%s\"}",
                     email, password
             );
 
-            // Build the HTTP request to send to the login endpoint
-            // This is like preparing an envelope with the login information
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(BASE_URL + "/api/login"))
                     .timeout(Duration.ofSeconds(30))
@@ -124,63 +111,50 @@ public class AuthService {
                     .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                     .build();
 
-            // Log what we're doing for debugging purposes
             System.out.println("Appel API: " + BASE_URL + "/api/login");
             System.out.println("Données envoyées: " + requestBody);
 
-            // Send the request and wait for the server's response
             HttpResponse<String> response = httpClient.send(request,
                     HttpResponse.BodyHandlers.ofString());
 
-            // Log the server's response for debugging
             System.out.println("Status Code: " + response.statusCode());
             System.out.println("Response Body: " + response.body());
 
-            // Check what the server responded with
             if (response.statusCode() == 200) {
-                // Success! Parse the JSON response
+                // Parse la réponse pour récupérer le token
                 JsonNode jsonResponse = objectMapper.readTree(response.body());
                 currentToken = jsonResponse.get("token").asText();
 
-                // Try to get user information from the login response
-                if (jsonResponse.has("user")) {
-                    currentUser = jsonResponse.get("user");
-                    System.out.println("Données utilisateur récupérées depuis login");
-                } else {
-                    // If user info wasn't included, make a separate request to get it
-                    fetchUserData();
+                // IMPORTANT: Récupérer les données utilisateur AVANT de vérifier le rôle
+                if (!fetchUserData()) {
+                    return new AuthResult(false, "Impossible de récupérer les données utilisateur", null);
                 }
 
-                // Check if the user has permission to access the analytics dashboard
-                String role = extractRole(jsonResponse);
-
-                if (!"ROLE_SALES".equals(role) && !"ROLE_ADMIN".equals(role)) {
-                    return new AuthResult(false, "Droits insuffisants - Accès réservé aux commerciaux", null);
+                // MAINTENANT on peut vérifier le rôle
+                if (!"Sales".equals(currentUser.getRole()) && !"Admin".equals(currentUser.getRole())) {
+                    // Nettoyer les données si l'utilisateur n'a pas les droits
+                    currentToken = null;
+                    currentUser = null;
+                    return new AuthResult(false, "Droits insuffisants - Accès réservé aux commerciaux et administrateurs", null);
                 }
 
                 return new AuthResult(true, "Connexion réussie", currentToken);
 
             } else if (response.statusCode() == 401) {
-                // Wrong username or password
                 return new AuthResult(false, "Email ou mot de passe incorrect", null);
             } else if (response.statusCode() == 404) {
-                // API endpoint not found - probably a server configuration issue
                 return new AuthResult(false, "Endpoint non trouvé - Vérifiez votre API Symfony", null);
             } else {
-                // Some other error from the server
                 return new AuthResult(false, "Erreur de connexion (" + response.statusCode() + ")", null);
             }
 
         } catch (java.net.ConnectException e) {
-            // Server is not running or not reachable
             System.err.println("Connexion refusée: " + e.getMessage());
             return new AuthResult(false, "Serveur non disponible sur le port 8000", null);
         } catch (IOException | InterruptedException e) {
-            // Network problems or request was interrupted
             System.err.println("Erreur réseau: " + e.getMessage());
             return new AuthResult(false, "Impossible de contacter le serveur. Vérifiez votre connexion.", null);
         } catch (Exception e) {
-            // Any other unexpected error
             System.err.println("❌ Erreur inattendue: " + e.getMessage());
             e.printStackTrace();
             return new AuthResult(false, "Erreur de connexion: " + e.getMessage(), null);
@@ -194,12 +168,10 @@ public class AuthService {
      * Think of this as asking for your ID card after you've already been let through security.
      * We use the authentication token to prove we're allowed to get this information.
      */
-    private void fetchUserData() {
+    private boolean fetchUserData() {
         try {
-            // Make a request to get user information
-            // We include our authentication token to prove we're logged in
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(BASE_URL + "/api/users"))
+                    .uri(URI.create(BASE_URL + "/api/users/me"))
                     .timeout(Duration.ofSeconds(30))
                     .header("Content-Type", "application/json")
                     .header("Authorization", "Bearer " + currentToken)
@@ -210,54 +182,41 @@ public class AuthService {
                     HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() == 200) {
-                // Parse the response and store user information
-                JsonNode usersArray = objectMapper.readTree(response.body());
-                if (usersArray.isArray() && usersArray.size() > 0) {
-                    // Take the first user (in a real app, you'd search for the specific user)
-                    currentUser = usersArray.get(0);
-                    System.out.println("Données utilisateur récupérées");
-                }
+                System.out.println("Données utilisateur récupérées " + response.body());
+
+                currentUser = objectMapper.readValue(response.body(), User.class);
+                System.out.println("Utilisateur connecté: " + currentUser);
+                return true;
             } else {
                 System.err.println("Erreur récupération utilisateur: " + response.statusCode());
+                return false;
             }
         } catch (Exception e) {
             System.err.println("Erreur fetchUserData: " + e.getMessage());
+            return false;
         }
     }
 
-    /**
-     * Alternative method to get user information by email.
-     * This method uses a different API endpoint that might be more specific to getting
-     * user profile information.
-     *
-     * Note: This method is not currently used but is kept for future development.
-     *
-     * @param email The email address of the user to fetch information for
-     * @deprecated This method is not currently used in the application flow
-     */
-    @Deprecated
-    private void getUserByEmail(String email) {
-        try {
-            // Make a request to get user profile information
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(BASE_URL + "/api/user/profile"))
-                    .header("Authorization", "Bearer " + currentToken)
-                    .GET()
-                    .timeout(Duration.ofSeconds(10))
-                    .build();
-
-            HttpResponse<String> response = httpClient.send(request,
-                    HttpResponse.BodyHandlers.ofString());
-
-            if (response.statusCode() == 200) {
-                currentUser = objectMapper.readTree(response.body());
-                System.out.println("Données utilisateur récupérées");
-            }
-        } catch (Exception e) {
-            System.err.println("Erreur API utilisateur: " + e.getMessage());
-        }
+    // Modifier les méthodes publiques
+    public User getCurrentUser() {
+        return currentUser;
     }
 
+    public String getCurrentUserName() {
+        return currentUser != null ? currentUser.getFullName() : "Invité";
+    }
+
+    public String getCurrentUserRole() {
+        return currentUser != null ? currentUser.getRole() : "Aucun rôle";
+    }
+    public void logout() {
+        currentToken = null;
+        currentUser = null;
+        System.out.println("Utilisateur déconnecté");
+    }
+    public boolean isLoggedIn() {
+        return currentToken != null && currentUser != null;
+    }
     /**
      * A simple container class that holds the result of a login attempt.
      * This is like a report card that tells you whether the login worked or not,
@@ -314,46 +273,5 @@ public class AuthService {
         public String getMessage() {
             return message;
         }
-
-        /**
-         * Returns the authentication token if login was successful.
-         *
-         * @return The authentication token, or null if login failed
-         */
-        public String getToken() {
-            return token;
-        }
-    }
-
-    /**
-     * Extracts the user's role from the API response.
-     * This method tries different possible locations where the role might be stored
-     * because different API versions might structure the data differently.
-     *
-     * The role determines what features the user can access in the application.
-     * Only "ROLE_SALES" and "ROLE_ADMIN" users are allowed to use the analytics dashboard.
-     *
-     * @param jsonResponse The JSON response from the login API
-     * @return The user's role as a string (defaults to "ROLE_SALES" if not found)
-     */
-    private String extractRole(JsonNode jsonResponse) {
-        String role = "ROLE_SALES"; // Default role if none is found
-
-        // Try to find the role in different possible locations in the JSON
-        if (jsonResponse.has("roles") && jsonResponse.get("roles").isArray()) {
-            // Some APIs return roles as an array
-            JsonNode rolesArray = jsonResponse.get("roles");
-            if (!rolesArray.isEmpty()) {
-                role = rolesArray.get(0).asText();
-            }
-        } else if (jsonResponse.has("role")) {
-            // Some APIs return role as a single field
-            role = jsonResponse.get("role").asText();
-        } else if (currentUser != null && currentUser.has("role")) {
-            // Check if the role is in the user data we fetched separately
-            role = currentUser.get("role").asText();
-        }
-
-        return role;
     }
 }

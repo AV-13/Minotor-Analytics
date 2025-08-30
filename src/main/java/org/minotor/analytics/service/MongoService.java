@@ -161,7 +161,7 @@ public class MongoService {
      */
     public List<AnalyticsEvent> getAnalyticsEvents() {
         List<AnalyticsEvent> events = new ArrayList<>();
-        System.out.println("\n=== RÉCUPÉRATION DES ÉVÉNEMENTS ===");
+//        System.out.println("\n=== RÉCUPÉRATION DES ÉVÉNEMENTS ===");
 
         try {
             // Try different possible names for the analytics collection
@@ -180,7 +180,7 @@ public class MongoService {
 
             // Test each possible collection name until we find one with data
             for (String collectionName : possibleCollections) {
-                System.out.println("Test de la collection: " + collectionName);
+//                System.out.println("Test de la collection: " + collectionName);
 
                 try {
                     MongoCollection<Document> testCollection = database.getCollection(collectionName);
@@ -189,23 +189,22 @@ public class MongoService {
                     if (count > 0) {
                         collection = testCollection;
                         foundCollectionName = collectionName;
-                        System.out.println("Collection '" + collectionName + "' trouvée avec " + count + " documents");
+//                        System.out.println("Collection '" + collectionName + "' trouvée avec " + count + " documents");
                         break;
                     }
                 } catch (Exception e) {
-                    System.out.println("Collection '" + collectionName + "' non accessible");
+//                    System.out.println("Collection '" + collectionName + "' non accessible");
                 }
             }
 
             // If we found a collection with data, process it
             if (collection != null) {
-                System.out.println("Récupération des données de: " + foundCollectionName);
+//                System.out.println("Récupération des données de: " + foundCollectionName);
 
                 int successCount = 0;
                 int errorCount = 0;
 
-                // Process documents (limit to 100 for testing to avoid overwhelming the system)
-                for (Document doc : collection.find().limit(100)) {
+                for (Document doc : collection.find()) {
                     try {
                         AnalyticsEvent event = mapDocumentToEvent(doc);
                         // Only add events that have essential data
@@ -215,23 +214,23 @@ public class MongoService {
                         }
                     } catch (Exception e) {
                         errorCount++;
-                        System.err.println("Erreur sur un document: " + e.getMessage());
+//                        System.err.println("Erreur sur un document: " + e.getMessage());
                     }
                 }
 
-                System.out.println("Documents traités avec succès: " + successCount);
-                System.out.println("Documents en erreur: " + errorCount);
+//                System.out.println("Documents traités avec succès: " + successCount);
+//                System.out.println("Documents en erreur: " + errorCount);
 
             } else {
                 // No real data found, create test data so the app still works
-                System.out.println("Aucune collection d'analytics trouvée");
+//                System.out.println("Aucune collection d'analytics trouvée");
                 events = createTestData();
             }
 
-            System.out.println("Nombre total d'événements créés: " + events.size());
+//            System.out.println("Nombre total d'événements créés: " + events.size());
 
         } catch (Exception e) {
-            System.err.println("Erreur lors de la récupération des événements: " + e.getMessage());
+//            System.err.println("Erreur lors de la récupération des événements: " + e.getMessage());
             e.printStackTrace();
             // If anything goes wrong, fall back to test data
             events = createTestData();

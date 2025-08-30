@@ -14,6 +14,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import org.minotor.analytics.model.AnalyticsEvent;
+import org.minotor.analytics.model.User;
 import org.minotor.analytics.service.AnalyticsService;
 import org.minotor.analytics.service.AuthService;
 import org.minotor.analytics.utils.SceneManager;
@@ -55,7 +56,8 @@ public class DashboardController implements Initializable {
     private AnalyticsService analyticsService;
 
     // ===== UI COMPONENTS - PROFILE SECTION =====
-
+    @FXML
+    private Button refreshBtn;
     /**
      * Label displaying the current user's full name
      */
@@ -293,8 +295,8 @@ public class DashboardController implements Initializable {
      */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Initialize services
-        authService = new AuthService();
+        // Initialize services - RÉCUPÉRER AuthService depuis SceneManager
+        authService = SceneManager.getAuthService(); // Au lieu de new AuthService()
         analyticsService = new AnalyticsService();
         eventsList = FXCollections.observableArrayList();
 
@@ -307,7 +309,7 @@ public class DashboardController implements Initializable {
 
         // Load initial data
         loadData();
-        loadUserProfile();
+        loadUserProfile(); // Cette méthode va maintenant fonctionner
 
         // Set default filter highlighting
         highlightActiveFilter(filterAllBtn);
@@ -315,7 +317,6 @@ public class DashboardController implements Initializable {
         // Schedule CSS loading after scene construction
         scheduleStyleLoading();
     }
-
     /**
      * Loads the application logo from resources.
      * Falls back gracefully if logo file is not found.
@@ -459,6 +460,7 @@ public class DashboardController implements Initializable {
             updatePagesDetailChart();
             updateDevicesDetailChart();
             updateEventTypesCharts();
+            updateProfileLabels();
 
             System.out.println("Data loaded: " + events.size() + " events for period " + currentPeriod);
         } catch (Exception e) {
@@ -466,51 +468,81 @@ public class DashboardController implements Initializable {
         }
     }
 
+    private void debugAuthService() {
+        System.out.println("=== DEBUG AUTH SERVICE ===");
+        System.out.println("AuthService from SceneManager: " + SceneManager.getAuthService());
+        System.out.println("AuthService local: " + authService);
+
+        if (authService != null) {
+            System.out.println("Current user: " + authService.getCurrentUser());
+            System.out.println("Is logged in: " + authService.isLoggedIn());
+        } else {
+            System.out.println("❌ AuthService est NULL !");
+        }
+        System.out.println("========================");
+    }
     /**
      * Loads and displays current user profile information.
      * Updates profile labels with user name, role, and email from authentication service.
      */
     private void loadUserProfile() {
+        debugAuthService();
         try {
-            JsonNode user = authService.getCurrentUser();
+            User currentUser = authService.getCurrentUser();
+            System.out.println("USER USER USER USER USER USER " + currentUser);
 
-            if (user != null) {
-                String firstName = user.has("firstName") ? user.get("firstName").asText() : "";
-                String lastName = user.has("lastName") ? user.get("lastName").asText() : "";
-                String email = user.has("email") ? user.get("email").asText() : "";
-                String role = user.has("role") ? user.get("role").asText() : "";
+            if (currentUser != null) {
+                // Afficher le nom complet
+                profileNameLabel.setText(currentUser.getFullName());
 
-                updateProfileLabels(firstName, lastName, email, role);
-                System.out.println("User profile loaded: " + firstName + " " + lastName);
+                // Afficher le rôle traduit
+                profileRoleLabel.setText(translateRole(currentUser.getRole()));
+
+                // Afficher l'email si le label existe
+                if (profileEmailLabel != null) {
+                    profileEmailLabel.setText(currentUser.getEmail());
+                }
+
+                System.out.println("✅ Profil chargé: " + currentUser.getFullName() + " (" + currentUser.getRole() + ")");
             } else {
+                System.err.println("❌ Aucun utilisateur connecté trouvé");
                 setDefaultProfileValues();
             }
         } catch (Exception e) {
-            System.err.println("❌ Error loading profile: " + e.getMessage());
+            System.err.println("❌ Erreur lors du chargement du profil: " + e.getMessage());
             setDefaultProfileValues();
         }
     }
 
     /**
      * Updates profile labels with user information.
-     *
-     * @param firstName User's first name
-     * @param lastName User's last name
-     * @param email User's email address
-     * @param role User's role code
      */
-    private void updateProfileLabels(String firstName, String lastName, String email, String role) {
-        if (profileNameLabel != null) {
-            String fullName = (firstName + " " + lastName).trim();
-            profileNameLabel.setText(!fullName.isEmpty() ? fullName : email);
-        }
+    private void updateProfileLabels() {
+        try {
+            // Récupérer les informations de l'utilisateur connecté
+            String userName = authService.getCurrentUserName();
+            String userRole = authService.getCurrentUserRole();
+            User user = authService.getCurrentUser();
+            System.out.println("USER  USER USER USER : " + user);
 
-        if (profileRoleLabel != null) {
-            profileRoleLabel.setText(translateRole(role));
-        }
+            // Mettre à jour les labels avec les vraies informations
+            if (userName != null && !userName.isEmpty()) {
+                profileNameLabel.setText(userName);
+            } else {
+                profileNameLabel.setText("Utilisateur");
+            }
 
-        if (profileEmailLabel != null) {
-            profileEmailLabel.setText(email);
+            if (userRole != null && !userRole.isEmpty()) {
+                profileRoleLabel.setText(userRole);
+            } else {
+                profileRoleLabel.setText("Membre");
+            }
+
+        } catch (Exception e) {
+            System.err.println("Erreur lors de la mise à jour du profil: " + e.getMessage());
+            // Valeurs par défaut en cas d'erreur
+            profileNameLabel.setText("Utilisateur");
+            profileRoleLabel.setText("Membre");
         }
     }
 
@@ -529,14 +561,19 @@ public class DashboardController implements Initializable {
      * @return Translated role name in French
      */
     private String translateRole(String role) {
-        return switch (role.toUpperCase()) {
+        if (role == null) return "Utilisateur";
+
+        return switch (role) {
+            case "Admin" -> "Administrateur";
+            case "Sales" -> "Commercial";
+            case "User" -> "Utilisateur";
+            // Support des anciens formats si nécessaire
             case "ROLE_ADMIN" -> "Administrateur";
             case "ROLE_SALES" -> "Commercial";
             case "ROLE_USER" -> "Utilisateur";
             default -> "Utilisateur";
         };
     }
-
     // ===== CHART UPDATE METHODS =====
 
     /**
@@ -873,6 +910,8 @@ public class DashboardController implements Initializable {
         if (analyticsService != null) {
             analyticsService.close();
         }
+        SceneManager.clearAuthService();
+
         SceneManager.setScene(event, "/org/minotor/analytics/login-view.fxml", false);
     }
 

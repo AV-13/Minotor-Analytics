@@ -147,6 +147,7 @@ public class LoginController implements Initializable {
                 if (result.isSuccess()) {
                     LOGGER.info("Connexion réussie, redirection vers dashboard...");
                     // Go to main dashboard screen
+                    SceneManager.setAuthService(authService);
                     SceneManager.setScene(event, "/org/minotor/analytics/dashboard-view.fxml", true);
                 } else {
                     LOGGER.warning("Échec de connexion: " + result.getMessage());

@@ -7,6 +7,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import org.minotor.analytics.service.AuthService;
 
 import java.io.IOException;
 
@@ -22,6 +23,16 @@ import java.io.IOException;
  */
 public class SceneManager {
 
+    private static AuthService authService;
+
+
+    public static void setAuthService(AuthService service) {
+        authService = service;
+    }
+
+    public static AuthService getAuthService() {
+        return authService;
+    }
     /**
      * Changes the current screen to a new one by loading an FXML file.
      * This is the main method that does all the heavy work of switching screens.
@@ -78,7 +89,13 @@ public class SceneManager {
                     stage.setFullScreen(true);
                 }
             });
-
+            if (fxmlPath.contains("dashboard")) {
+                if (authService == null) {
+                    System.err.println("⚠️ AuthService non défini dans SceneManager");
+                } else {
+                    System.out.println("✅ AuthService disponible pour le dashboard");
+                }
+            }
         } catch (IOException e) {
             // If something goes wrong loading the FXML file, print the error
             e.printStackTrace();
@@ -177,5 +194,15 @@ public class SceneManager {
      */
     private static Stage getStageFromNode(Node node) {
         return (Stage) node.getScene().getWindow();
+    }
+    /**
+     * Nettoie l'AuthService lors de la déconnexion
+     */
+    public static void clearAuthService() {
+        if (authService != null) {
+            authService.logout();
+        }
+        authService = null;
+        System.out.println("✅ AuthService nettoyé dans SceneManager");
     }
 }

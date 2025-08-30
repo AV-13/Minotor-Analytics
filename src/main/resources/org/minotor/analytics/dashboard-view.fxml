@@ -75,11 +75,10 @@
                         <Button fx:id="filterWeekBtn" text="Cette semaine" onAction="#filterWeek" styleClass="filter-button"/>
                         <Button fx:id="filterMonthBtn" text="Ce mois" onAction="#filterMonth" styleClass="filter-button"/>
                         <Button fx:id="filterAllBtn" text="Toutes les données" onAction="#filterAll" styleClass="filter-button"/>
-
+                        <Button fx:id="refreshBtn" text="🔄 Actualiser" onAction="#refreshData" styleClass="refresh-button"/>
                         <Region HBox.hgrow="ALWAYS"/>
                         <Button text="📥 Exporter CSV" onAction="#exportData" styleClass="export-button"/>
                     </HBox>
-
                     <HBox spacing="24" alignment="CENTER">
                         <VBox styleClass="chart-card" alignment="CENTER" spacing="12">
                             <Label text="📄 Pages les plus visitées" styleClass="chart-card-title"/>
@@ -102,8 +101,13 @@
                     </HBox>
 
                     <VBox styleClass="chart-container">
-                        <BarChart fx:id="pagesDetailChart" prefWidth="800" prefHeight="500" styleClass="main-chart">
-                            <xAxis><CategoryAxis styleClass="chart-axis"/></xAxis>
+                        <BarChart fx:id="pagesDetailChart" prefWidth="400" prefHeight="500" styleClass="main-chart">
+                            <xAxis>
+                                <CategoryAxis styleClass="chart-axis"
+                                              tickLabelRotation="-45"
+                                              tickLabelGap="5"
+                                              maxWidth="380"/>
+                            </xAxis>
                             <yAxis><NumberAxis styleClass="chart-axis"/></yAxis>
                         </BarChart>
                     </VBox>

@@ -85,7 +85,17 @@
     -fx-pref-width: 380; /* Largeur fixe pour la cohérence */
     -fx-max-width: 380;
 }
-
+.refresh-button {
+    -fx-background-color: #8B6A47; /* Marron moyen */
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-padding: 10 16;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+    -fx-min-height: 36;
+    -fx-effect: dropshadow(gaussian, rgba(139, 106, 71, 0.4), 6, 0, 0, 2);
+}
 .login-button {
     -fx-background-color: #C3552B;
     -fx-text-fill: white;
